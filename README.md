@@ -1,5 +1,5 @@
 # ROR Retriever
-The [Research Organizatiopn Registry](https://ror.org) provides access to a growing collection of unique and persistent identifiers (RORs) for research organizations and a [web interface](https://ror.org) and [API](https://ror.readme.io/docs/rest-api) for searching the collection with an organization name or a affiliation string. The web interface and API work well if you have a small number of affiliation strings that need identifiers, but what if you have several hundred organization names or thousands of affiliation strings. This is the daunting problem that repositories face when they are trying to populate their existing records with identifiers. ROR Retriever is a tool developed to help address this problem.
+The [Research Organizatiopn Registry](https://ror.org) provides access to a growing collection of unique and persistent identifiers (RORs) for research organizations and a [web interface](https://ror.org) and [API](https://ror.readme.io/docs/rest-api) for searching the collection with an organization name or a affiliation string. The web interface and API work well if you have a small number of affiliation strings that need identifiers, but what if you have several hundred organization names or thousands of affiliation strings? This is the daunting problem that repositories face when they are trying to populate their existing records with identifiers. ROR Retriever is a tool developed to help address these repositories and others that are ready to add identifiers to large collections with many affiliations.
 
 # Usage
 **Use python RORRetriever.py -h to see this usage description.**
@@ -47,10 +47,10 @@ The columns in this file are:
 |chosen_Affiliation|TRUE if the algorithm chose this organization.|
 |score|The algorithm score for this organization (0 - 1). If chosen is TRUE, score is 1.|
 |numberOfResults_Affiliation|The number of results returned from the search.|
-|VALID|A column for recording validity during curation (always TRUE prior to curation).|
+|valid|A column for recording validity during curation (always TRUE prior to curation).|
 
 # Outputs - Search Details
-Some details of the ROR algorithm response can be displayed using the **--verbose** flag. This is automatic if only one affiliation is being searched. if **--verbose** is set, a table of the search results is shown with the following fields:
+Some details of the ROR algorithm response can be displayed using the **--details** flag. This is automatic if only one affiliation is being searched. if **--details** is set, a table of the search results is shown with the following fields:
 
 | Name  | Definition |
 |:--- |:---|
@@ -61,16 +61,16 @@ Some details of the ROR algorithm response can be displayed using the **--verbos
 |organization|Name of organization for ROR (should match substring)
 |country|Country of organization
 
-# Example
+# Examples
 As an example of some of the capabilities of this tool consider this list of affiliations:
 The University of Alabama Libraries
 Arizona State University Library
 UC Berkeley Library
 MIT Libraries
 
-These strings are affiliations because they contain the names of research organizations that house various libraries. These are simple affiliations as they include university names with the words library or libraries. Despite this simplicity, they demonstrate some interesting characteristics of the ROR Affiliation search. These affiliations 
+These strings are affiliations because they contain the names of research organizations along with other text. These are simple affiliations as they include university names with the words library or libraries. Despite this simplicity, they demonstrate some interesting characteristics of the ROR Affiliation search. These affiliations are in a test file in this repository (OrganizationNamesTest.txt).
 
-The command **RORRetriever -af OrganizationNamesTest.txt** uses the ROR affiliation API to search for RORs for these affiliations and gives this output to the terminal:
+The command **RORRetriever -af OrganizationNamesTest.txt** uses the ROR affiliation [API](https://ror.readme.io/docs/rest-api) to search for RORs for these affiliations and gives this output to the terminal:
 
 ```
 RORRetriever -af OrganizationNamesTest.txt           
@@ -88,9 +88,28 @@ More details are written to a tab-separated file (converted to a table here):
 |UC Berkeley Library|UC Berkeley Library|https://ror.org/01bndk311|Berkeley Public Library| United States|COMMON TERMS|True|0.9|10|True
 MIT Libraries|MIT|https://ror.org/047m6hg73|Management Intelligenter Technologien (Germany)| Germany|ACRONYM|True|0.9|18|True
 
-The output data shows that between 4 and 18 results were found for each of these affiliations and that RORs were identified for three. The organizationLookupName_Affiliation column gives the name associated with the ROR. In the first row, this name clearly matches the organization name in the input affiliation (The University of Alabama Libraries). In the other cases, the names suggest that either no match was chosen or the wrong match was chosen. 
+The output data shows that between 4 and 18 results were found for each of these affiliations and that RORs were identified for three. The organizationLookupName_Affiliation column gives the name associated with the ROR. In the first row, this name clearly matches the organization name in the input affiliation (The University of Alabama Libraries). In the other cases, the names suggest that either no match was chosen or the incorrect match was chosen. 
 
-There are two ways to find out what happened. First, the **--details** option can be used to show details for all searches at once, i.e. **RORRetriever -af OrganizationNamesTest.txt --details** or we can run each affiliation one at a time which automatically shows details.
+There are two ways to find out what actually happened. First, the **--details** option can be used to show details for all searches at once, i.e. **RORRetriever -af OrganizationNamesTest.txt --details** or we can run each affiliation one at a time which automatically shows details.
+
+The command **RORRetriever -a "The University of Alabama Libraries"** shows what happened for the affiliation "The University of Alabama Libraries". There were 9 results returned and University of Alabama was selected as the best result (score is 1 and chosen is True). Even though everything went well in this case, it demonstrates the kind of challenges that occur when over 100,000 organization names are being searched. First, many Universities have multiple campuses with very similar names. There are also many cases where states have two Universities with names like "University of Alabama" and "Alabama State University". In this case the algorithm overcame these challenges to find the correct organization. Great job!
+
+```
+
+2022-06-27 12:40:48:INFO:RORRetriever: 1 Input Affiliations
+                          substring  score matching_type  chosen                       ror                                   organization       country
+              University of Alabama   1.00    HEURISTICS    True https://ror.org/03xrrjk67                          University of Alabama United States
+              University of Alabama   0.89    HEURISTICS   False https://ror.org/010acrp16                     University of West Alabama United States
+              University of Alabama   0.88    HEURISTICS   False https://ror.org/01s7b5y08                    University of South Alabama United States
+              University of Alabama   0.88    HEURISTICS   False https://ror.org/0584fj407                    University of North Alabama United States
+                 Alabama University   0.86    HEURISTICS   False https://ror.org/01eedy375                       Alabama State University United States
+              University of Alabama   0.86    HEURISTICS   False https://ror.org/051fvmk98                   University of Alabama System United States
+                 Alabama University   0.82    HEURISTICS   False https://ror.org/05hz8m414 Alabama Agricultural and Mechanical University United States
+The University of Alabama Libraries   0.76  COMMON TERMS   False https://ror.org/008s83205            University of Alabama at Birmingham United States
+              University of Alabama   0.75    HEURISTICS   False https://ror.org/02zsxwr40            University of Alabama in Huntsville United States
+2022-06-27 12:40:49:INFO:RORRetriever: 1 new RORs written to AffiliationAPI_RORData__20220627_12.tsv
+2022-06-27 12:40:49:INFO:RORRetriever: AffiliationAPI_RORData__20220627_12.tsv 1 RORs Found
+```
 
 The command **RORRetriever -a "Arizona State University Library"** gives the following results:
 
@@ -104,7 +123,7 @@ Arizona State University Library   0.54  COMMON TERMS   False https://ror.org/01
 2022-06-27 11:39:20:INFO:RORRetriever: 0 new RORs written to AffiliationAPI_RORData__20220627_11.tsv
 2022-06-27 11:39:20:INFO:RORRetriever: AffiliationAPI_RORData__20220627_11.tsv 0 RORs Found
 ```
-The table shows the 4 results that were found and that the chosen column is False for all four, even though the right answer has the highest score of all four (0.86). The algorithm considers a number of factors in making a choice and, in this case, the correct answer did not pass the test.
+The table shows the 4 results that were found and that the chosen column is False for all four, even though the right answer has the highest (0.86). The algorithm considers a number of factors in making a choice and, in this case, the correct answer did not pass the test.
 
 The **--max** option can be used to choose the best answer even if the algorithm does not, so the command **RORRetriever -a "Arizona State University Library" --max** gives the results:
 
@@ -138,7 +157,7 @@ UC Berkeley Library   0.34  COMMON TERMS   False https://ror.org/05ehe8t08      
 UC Berkeley Library   0.32  COMMON TERMS   False https://ror.org/04wvygn49                         Fundación Copec UC         Chile
 ```
 
-In this case, the algorithm choses the ROR for "Berkeley Public Library" which has the maximum score (0.90) but is incorrect. The correct answer, University of California, Berkeley is in the results with a score of 0.58. This example is included here to remind us that there is an algorithm involved in these searches and we should help it as much as possible when we are providing affiliations to journals or libraries. In this case the acronym UC is a problem. The algorithm cannot guess that it stands for University of California. Help it out by writing the affiliation as University of California Berkeley Library and the algorithm gets thr gihht answer (**RORRetriever -a "University of California Berkeley Library"**).
+In this case, the algorithm choses the ROR for "Berkeley Public Library" which has the maximum score (0.90) but is incorrect. The correct answer, University of California, Berkeley is in the results with a score of 0.58. This example is included here to remind us that there is an algorithm involved in these searches and we should help it as much as possible when we are providing affiliations to journals or libraries. In this case the acronym UC is a problem. The algorithm cannot guess that it stands for University of California. Help it out by writing the affiliation as University of California Berkeley Library and the algorithm gets the right answer (**RORRetriever -a "University of California Berkeley Library"**).
 
 The final example (MIT Libraries) illustrated another problem case, using an acronym in an affiliation rather than spelling it out. In this case, the command *RORRetriever -a "MIT Libraries"* shows the 7 organizations with the acronym MIT:
 
