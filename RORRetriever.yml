@@ -1,0 +1,46 @@
+name: RORRetriever
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - brotlipy=0.7.0=py38hed1de0f_1004
+  - bzip2=1.0.8=h0d85af4_4
+  - ca-certificates=2022.6.15=h033912b_0
+  - certifi=2022.6.15=py38h50d1736_0
+  - cffi=1.15.0=py38h1a44b6c_0
+  - charset-normalizer=2.0.12=pyhd8ed1ab_0
+  - cryptography=37.0.2=py38h0f8513e_0
+  - idna=3.3=pyhd8ed1ab_0
+  - libblas=3.9.0=15_osx64_openblas
+  - libcblas=3.9.0=15_osx64_openblas
+  - libcxx=14.0.5=hce7ea42_1
+  - libffi=3.4.2=h0d85af4_5
+  - libgfortran=5.0.0=9_3_0_h6c81a4c_23
+  - libgfortran5=9.3.0=h6c81a4c_23
+  - liblapack=3.9.0=15_osx64_openblas
+  - libopenblas=0.3.20=openmp_hb3cd9ec_0
+  - libzlib=1.2.12=hfe4f2af_1
+  - llvm-openmp=14.0.4=ha654fa7_0
+  - ncurses=6.3=h96cf925_1
+  - numpy=1.23.0=py38h604f2a5_0
+  - openssl=1.1.1p=hfe4f2af_0
+  - pandas=1.4.3=py38h2b30649_0
+  - pip=22.1.2=pyhd8ed1ab_0
+  - pycparser=2.21=pyhd8ed1ab_0
+  - pyopenssl=22.0.0=pyhd8ed1ab_0
+  - pysocks=1.7.1=py38h50d1736_5
+  - python=3.8.13=h394c593_0_cpython
+  - python-dateutil=2.8.2=pyhd8ed1ab_0
+  - python_abi=3.8=2_cp38
+  - pytz=2022.1=pyhd8ed1ab_0
+  - readline=8.1.2=h3899abd_0
+  - requests=2.28.0=pyhd8ed1ab_1
+  - setuptools=62.6.0=py38h50d1736_0
+  - six=1.16.0=pyh6c4a22f_0
+  - sqlite=3.38.5=hd9f0692_0
+  - tk=8.6.12=h5dbffcc_0
+  - urllib3=1.26.9=pyhd8ed1ab_0
+  - wheel=0.37.1=pyhd8ed1ab_0
+  - xz=5.2.5=haf1e3a3_1
+  - zlib=1.2.12=hfe4f2af_1
+prefix: /Users/metadatagamechanger/opt/anaconda3/envs/RORRetriever
