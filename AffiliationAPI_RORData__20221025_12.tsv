@@ -1,0 +1,15 @@
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+The University of Alabama Libraries	University of Alabama	https://ror.org/03xrrjk67	University of Alabama	United States	HEURISTICS	True	1.0	9	True
+Arizona State University Library					No Match			4	False
+UC Berkeley Library	UC Berkeley Library	https://ror.org/01bndk311	Berkeley Public Library	United States	COMMON TERMS	True	0.9	7	True
+MIT Libraries					No Match			15	False
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+The University of Alabama Libraries	University of Alabama	https://ror.org/03xrrjk67	University of Alabama	United States	HEURISTICS	True	1.0	9	True
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+Arizona State University Library					No Match		0	4	False
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+Arizona State University Library	Arizona State University Library	https://ror.org/03efmqc40	Arizona State University	United States	COMMON TERMS	False	0.86	4	True
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+UC Berkeley Library	UC Berkeley Library	https://ror.org/01bndk311	Berkeley Public Library	United States	COMMON TERMS	True	0.9	7	True
+affiliation	searchString_Affiliation	ROR_Affiliation	organizationLookupName_Affiliation	country_Affiliation	match_Affiliation	chosen_Affiliation	score	numberOfResults_Affiliation	valid
+MIT Libraries					No Match		0	15	False

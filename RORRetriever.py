@@ -130,6 +130,10 @@ commandLine.add_argument('-af', "--affiliationFilename",
                         type=str,
                         help='a file with one affiliation per line in current working directory',
 )
+commandLine.add_argument('-ac', "--affiliationColumn",
+                        type=str,
+                        help='name of affiliation column',
+)
 commandLine.add_argument('-ad', "--affiliationData",
                         type=str,
                         help='datafile (tsv, csv) with affiliations in cwd)',
@@ -197,6 +201,10 @@ if args.affiliationData:                            # affiliations in data file 
         delimiter = '\t'
     data_df = pd.read_csv(args.affiliationData,sep=delimiter,encoding='utf-8')
 
+    if args.affiliationData:
+        columnName = args.affiliationColumn
+        lggr.info(f'Affiliations in {args.affiliationColumn}')
+
     if 'Affiliation' in data_df.columns:
         columnName = 'Affiliation'
     elif 'affiliation' in data_df.columns:
@@ -207,6 +215,7 @@ if args.affiliationData:                            # affiliations in data file 
     input_l = data_df[columnName].unique().tolist()
 
 lggr.info(f'{len(input_l)} Input Affiliations')
+
 if args.matchMax:
     lggr.info(f'************** Best match is being found (may not be chosen by algorithm, score < 1.0)')
 
