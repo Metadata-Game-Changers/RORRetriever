@@ -70,7 +70,7 @@ def outputResults(tl: list,             # affiliation list input (list of dicts)
 
     lggr.info("{} new RORs written to {}".format(cnt,output))
 
-def printResponse(df:pd.core.frame.DataFrame):
+def printResponse(result):
     '''
         Show response table on terminal with following fields:
         substring:      Search string (can be substring of complete affiliation)
@@ -80,12 +80,17 @@ def printResponse(df:pd.core.frame.DataFrame):
         organization:   Name of organization for ROR (should match substring)
         country:        Country of organization
     '''
-    out_df = df[['substring','score','matching_type','chosen']]       
-    out_df['ror'] = df['organization'].apply(lambda x: x['id'])
-    out_df['organization'] = df['organization'].apply(lambda x: x['name'])
-    out_df['country'] = df['organization'].apply(lambda x: x['country']['country_name'])
-    pd.set_option('display.width', 1000)
-    print(out_df.to_string(index=False))
+    if isinstance(result, pd.DataFrame):
+        out_df        = result[['substring','score','matching_type','chosen']]       
+        out_df['ror'] = result['organization'].apply(lambda x: x['id'])
+        out_df['organization']      = result['organization'].apply(lambda x: [y['value'] for y in x['names'] if 'ror_display' in y['types']][0])
+        out_df['lang']              = result['organization'].apply(lambda x: [y['lang'] for y in x['names']  if 'ror_display' in y['types']][0])
+        out_df['country']           = result['organization'].apply(lambda x: x['locations'][0]['geonames_details']['country_name'])
+        pd.set_option('display.width', 1000)
+        print(out_df.to_string(index=False))
+    else:
+        for i, item in enumerate(result['items']):
+            print(f"{i+1:>3} {item['substring']:<50} {item['score']:<6.2f} {item['matching_type']:<10} {item['chosen']} {item['organization']['name']} {item['organization']['country']['country_name']} {item['organization']['id']}")
 
 
 def retrieveData(url:str                            # URL to search
@@ -238,6 +243,7 @@ writeHeader = True
 #
 ror_list = []
 newRORCount = 0
+RORSchemaVersion = 2.0
 #
 # loop through affiliations in input_l
 #
@@ -252,7 +258,7 @@ for i, affiliation in enumerate(input_l):       # loop affiliations in input_l
         writeHeader = False
         ror_list = []
 
-    URL = 'https://api.ror.org/organizations?affiliation=' + quote(affiliation.encode('utf-8'))
+    URL = 'https://api.ror.org/v2/organizations?affiliation=' + quote(affiliation.encode('utf-8'))
     r = retrieveData(URL)
 
     if (r is None) or (r.status_code != 200):
@@ -271,7 +277,11 @@ for i, affiliation in enumerate(input_l):       # loop affiliations in input_l
                     'valid':False})
         continue                                                # next affiliation
 
-    acronymCount = len(response_df[response_df['matching_type']=='ACRONYM'])                # count Acronyms
+    if RORSchemaVersion == 2.0:
+        acronymCount = len([ x['matching_type'] for x in response['items'] if x['matching_type'] == 'ACRONYM'])  # get number of matching_types = 'ACRONYM'
+    else:
+        acronymCount = len(response_df[response_df['matching_type']=='ACRONYM'])       # count Acronyms
+    
     if (acronymCount == response['number_of_results']) and (args.noAcronyms is True):       # search result is all acronyms:
         ror_list.append({'affiliation':affiliation,              # set affiliation, numberOfResults, and match = 'No Result'
                     'numberOfResults_Affiliation':0,
@@ -279,36 +289,63 @@ for i, affiliation in enumerate(input_l):       # loop affiliations in input_l
                     'valid':False})
         continue                                                # next affiliation
 
-    if (len(input_l) == 1) or args.showDetails:                # if only one affiliation is being tested    
-        printResponse(response_df)                              # or --response is set, print results
+    if (len(input_l) == 1) or args.showDetails:                 # if only one affiliation is being tested
+                                                                # or --details is set, print results
+        if RORSchemaVersion == 2.0:
+            #printResponse(response['items'])
+            printResponse(response_df)
+        else:
+            printResponse(response_df)
+
 
     if (args.noAcronyms is True):                           # remove acronym matches from response _df
         response_df = response_df[response_df['matching_type'] != 'ACRONYM']
     #
     # search for item chosen as best match be affiliation API
     #
-    maxScore = response_df.score.max()                               # find maximum score
-    if args.matchMax is False:
-        chosen_df = response_df[response_df.chosen == True]          # create chosen dataframe where chosen = True
+    if RORSchemaVersion == 2.0:
+        maxScore = max([x['score'] for x in response['items']])      # find maximum score (schema version 2.0)
     else:
-        chosen_df = response_df[response_df.score == maxScore]       # create chosen dataframe where score = maxScore
+        maxScore = response_df.score.max()                               # find maximum score (schema version 1.0)
+
+    if args.matchMax is False:
+        chosen_df = response_df[response_df.chosen == True]                 # create chosen dataframe where chosen = True
+        chosen_l  = [x for x in response['items'] if x['chosen'] is True]   # create list of chosen items
+    else:
+        chosen_df = response_df[response_df.score == maxScore]                  # create chosen dataframe where score = maxScore
+        chosen_l  = [x for x in response['items'] if x['score'] == maxScore]    # create list of items where score = maxScore
 
                                                                         # items can be chosen (chosenScore = 1) or, 
                                                                         # if --max is set the item with the max score is chosen
                                                                         # even if ROR algorithm did not chose item
     if len(chosen_df) > 0:
-        newRORCount += len(chosen_df)                                   # count new RORs
-        for i in chosen_df.index:                                       # add new RORs to ror_list
-            ror_list.append({'affiliation':affiliation,
-                                'searchString_Affiliation':chosen_df.loc[i,'substring'].replace('"',''),
-                                'ROR_Affiliation':chosen_df.loc[i,'organization']['id'], 
-                                'organizationLookupName_Affiliation':chosen_df.loc[i,'organization']['name'],
-                                'chosen_Affiliation':chosen_df.loc[i,'chosen'], 
-                                'score':chosen_df.loc[i,'score'],
+        if RORSchemaVersion == 2.0:                                     # schema version 2.0
+            newRORCount += len(chosen_l)                                # count new RORs
+            for i, item in enumerate(chosen_l):
+                ror_list.append({'affiliation':affiliation,
+                                'searchString_Affiliation':item['substring'].replace('"',''),
+                                'ROR_Affiliation':item['organization']['id'], 
+                                'organizationLookupName_Affiliation':[ x['value'] for x in item['organization']['names'] if 'ror_display' in x['types'] ][0],
+                                'organizationLookupName_Language':   [ x['lang']  for x in item['organization']['names'] if 'ror_display' in x['types'] ][0],
+                                'chosen_Affiliation':item['chosen'], 
+                                'score':item['score'],
                                 'match_Affiliation': chosen_df.loc[i,'matching_type'],
-                                'country_Affiliation':chosen_df.loc[i,'organization']['country']['country_name'],
+                                'country_Affiliation':chosen_df.loc[i,'organization']['locations'][0]['geonames_details']['country_name'],
                                 'numberOfResults_Affiliation':response['number_of_results'],
                                 'valid': True})
+        else:                                                       # schema version 1.0
+            newRORCount += len(chosen_df)                                   # count new RORs
+            for i in chosen_df.index:                               # add new RORs to ror_list
+                ror_list.append({'affiliation':affiliation,
+                            'searchString_Affiliation':chosen_df.loc[i,'substring'].replace('"',''),
+                            'ROR_Affiliation':chosen_df.loc[i,'organization']['id'], 
+                            'organizationLookupName_Affiliation':chosen_df.loc[i,'organization']['name'],
+                            'chosen_Affiliation':chosen_df.loc[i,'chosen'], 
+                            'score':chosen_df.loc[i,'score'],
+                            'match_Affiliation': chosen_df.loc[i,'matching_type'],
+                            'country_Affiliation':chosen_df.loc[i,'organization']['country']['country_name'],
+                            'numberOfResults_Affiliation':response['number_of_results'],
+                            'valid': True})
             lggr.debug(newRORCount,':', affiliation,'<'+response_df.loc[i,'substring']+'>',response_df.loc[i,'organization']['name'])
     else:           # No item choosen
         ror_list.append({'affiliation': affiliation,
