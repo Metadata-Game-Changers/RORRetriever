@@ -11,10 +11,10 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "${env:HOME}/MetadataGameChanger/Repositories/RORRetriever",
+            "cwd": "${env:HOME}/ProjectsAndPlans/EarthScope/EarthScopeReCuration/iris",
             "args": [
-                    "-a",
-                    "https://ror.org/035xkbk20",
+                    "-af",
+                    "irisAffiliations.txt",
             ]
 
         }

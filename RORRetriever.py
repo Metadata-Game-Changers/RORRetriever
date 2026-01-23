@@ -51,6 +51,7 @@ def outputResults(tl: list,             # affiliation list input (list of dicts)
     #
     c_names = ['affiliation', 'searchString_Affiliation',
                    'ROR_Affiliation', 'organizationLookupName_Affiliation',
+                   'organizationLookupName_Language',
                    'country_Affiliation', 'match_Affiliation',
                    'chosen_Affiliation', 'score',
                    'numberOfResults_Affiliation', 'valid']
@@ -59,7 +60,9 @@ def outputResults(tl: list,             # affiliation list input (list of dicts)
 
     if len(df.columns) < 9:                     # add columns if needed
         for c in ['searchString_Affiliation', 'ROR_Affiliation', 
-                  'organizationLookupName_Affiliation', 'country_Affiliation',
+                  'organizationLookupName_Affiliation', 
+                  'organizationLookupName_Language',
+                  'country_Affiliation',
                   'chosen_Affiliation']:
             df.insert(0, c, value='')           # insert empty text ('') row named c at position 0
         df.insert(0,'score',0)                  # insert empty numeric row for scores (default = 0)
@@ -329,8 +332,8 @@ for i, affiliation in enumerate(input_l):       # loop affiliations in input_l
                                 'organizationLookupName_Language':   [ x['lang']  for x in item['organization']['names'] if 'ror_display' in x['types'] ][0],
                                 'chosen_Affiliation':item['chosen'], 
                                 'score':item['score'],
-                                'match_Affiliation': chosen_df.loc[i,'matching_type'],
-                                'country_Affiliation':chosen_df.loc[i,'organization']['locations'][0]['geonames_details']['country_name'],
+                                'match_Affiliation': item['matching_type'],
+                                'country_Affiliation':item['organization']['locations'][0]['geonames_details']['country_name'],
                                 'numberOfResults_Affiliation':response['number_of_results'],
                                 'valid': True})
         else:                                                       # schema version 1.0
